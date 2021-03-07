@@ -23,7 +23,7 @@ def find_inner_links(content):
 
 def create_zip_with_pages(content):
     i = 0
-    with zipfile.ZipFile('reuslt.zip', 'w') as zipped_f:
+    with zipfile.ZipFile('result.zip', 'w') as zipped_f:
         for page in content:
             zipped_f.writestr("page" + str(i) + ".html", page)
             i += 1
