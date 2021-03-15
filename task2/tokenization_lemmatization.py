@@ -1,3 +1,4 @@
+import re
 import string
 import zipfile
 
@@ -6,6 +7,8 @@ import pymorphy2
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 
+morph = pymorphy2.MorphAnalyzer()
+
 
 def tokenization(html):
     soup = BeautifulSoup(html).get_text()
@@ -13,6 +16,34 @@ def tokenization(html):
     result = set((filter(tokenization_condition, nltk.wordpunct_tokenize(soup))))
     result = exclude_punctuation(result)
     result = set(filter(exclude_trash(), result))
+    result = set(filter(exclude_numeral, result))
+    result = set(filter(exclude_not_permitted_symbols, result))
+    result = set(filter(exclude_glued_words, result))
+    return result
+
+
+def exclude_numeral(word):
+    regex = re.compile(r'^[0-9]+$')
+    if bool(regex.match(word.strip())):
+        return 1850 < int(word) < 2030
+    return True
+
+
+def exclude_not_permitted_symbols(word):
+    russian_words = re.compile(r'^[а-яА-Я]{2,}$')
+    english_words = re.compile(r'^[a-zA-Z]{2,}$')
+    numbers_words = re.compile(r'^[0-9]+$')
+    result = bool(russian_words.match(word)) or bool(english_words.match(word)) or bool(numbers_words.match(word))
+    return result
+
+
+def exclude_glued_words(word):
+    if word == word.upper():
+        return True
+    capitalize_word = word[0].upper() + word[1:]
+    split_result = re.findall(r'[А-ЯA-Z][^А-ЯA-Z]*', capitalize_word)
+    one_len_word_count = len(list(filter(lambda element : len(element) == 1, split_result)))
+    result = len(split_result) < 2 or one_len_word_count > 0
     return result
 
 
@@ -40,7 +71,6 @@ def write_tokenization_result(result):
 
 
 def lemmatization(tokenization_result):
-    morph = pymorphy2.MorphAnalyzer()
     lemmatization_map = dict()
     for word in tokenization_result:
         p = morph.parse(word)[0]
