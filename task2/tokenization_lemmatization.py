@@ -13,12 +13,12 @@ morph = pymorphy2.MorphAnalyzer()
 def tokenization(html):
     soup = BeautifulSoup(html).get_text()
     tokenization_condition = get_tokenization_condition()
-    result = set((filter(tokenization_condition, nltk.wordpunct_tokenize(soup))))
+    result = list((filter(tokenization_condition, nltk.wordpunct_tokenize(soup))))
     result = exclude_punctuation(result)
-    result = set(filter(exclude_trash(), result))
-    result = set(filter(exclude_numeral, result))
-    result = set(filter(exclude_not_permitted_symbols, result))
-    result = set(filter(exclude_glued_words, result))
+    result = list(filter(exclude_trash(), result))
+    result = list(filter(exclude_numeral, result))
+    result = list(filter(exclude_not_permitted_symbols, result))
+    result = list(filter(exclude_glued_words, result))
     return result
 
 
@@ -42,13 +42,13 @@ def exclude_glued_words(word):
         return True
     capitalize_word = word[0].upper() + word[1:]
     split_result = re.findall(r'[А-ЯA-Z][^А-ЯA-Z]*', capitalize_word)
-    one_len_word_count = len(list(filter(lambda element : len(element) == 1, split_result)))
+    one_len_word_count = len(list(filter(lambda element: len(element) == 1, split_result)))
     result = len(split_result) < 2 or one_len_word_count > 0
     return result
 
 
 def exclude_trash():
-    trash = ['«', '»', '→', '·', '®', '▼', '–', '▸', 'x', 'X']
+    trash = ['«', '»', '→', '·', '®', '▼', '–', '▸', 'x', 'X', ' ']
     return lambda word: word not in trash
 
 
@@ -70,14 +70,19 @@ def write_tokenization_result(result):
     index_txt.close()
 
 
+def get_lemma(word):
+    p = morph.parse(word)[0]
+    if p.normalized.is_known:
+        normal_form = p.normal_form
+    else:
+        normal_form = word.lower()
+    return normal_form
+
+
 def lemmatization(tokenization_result):
     lemmatization_map = dict()
     for word in tokenization_result:
-        p = morph.parse(word)[0]
-        if p.normalized.is_known:
-            normal_form = p.normal_form
-        else:
-            normal_form = word.lower()
+        normal_form = get_lemma(word)
         if not normal_form in lemmatization_map:
             lemmatization_map[normal_form] = []
         lemmatization_map[normal_form].append(word)
@@ -106,7 +111,7 @@ if __name__ == '__main__':
     tokenization_result = set()
     for file in archive.filelist:
         current_html_file = read_file(archive, file.filename)
-        current_file_tokenization_result = tokenization(current_html_file)
+        current_file_tokenization_result = set(tokenization(current_html_file))
         tokenization_result = tokenization_result | current_file_tokenization_result
         print("tokenization for", file.filename, "finished")
     write_tokenization_result(tokenization_result)
