@@ -51,9 +51,9 @@ def find_words_in_html_files(map):
     index = dict()
     i = 0
     for file in archive.filelist:
-        if i == 3:
-            break
-        i += 1
+        # if i == 3:
+        #     break
+        # i += 1
         html = archive.open(file.filename)
         html_word_list = tokenization(html)
         word_used = set()
