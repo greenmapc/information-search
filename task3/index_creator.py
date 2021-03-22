@@ -11,14 +11,8 @@ class WordInfo:
         self.general_count = 0
 
     def append_document_info(self, document_number, document_word_count):
-        self.documents.append((document_number, document_word_count))
+        self.documents.append(document_number)
         self.general_count += document_word_count
-
-    def sort_documents(self):
-        def comparator(x, y):
-            return x[1] - y[1]
-
-        self.documents = sorted(self.documents, key=cmp_to_key(comparator), reverse=True)
 
 
 def read_lemmatization():
@@ -57,9 +51,9 @@ def find_words_in_html_files(map):
     index = dict()
     i = 0
     for file in archive.filelist:
-        # if i == 3:
-        #     break
-        # i += 1
+        if i == 3:
+            break
+        i += 1
         html = archive.open(file.filename)
         html_word_list = tokenization(html)
         word_used = set()
@@ -75,8 +69,6 @@ def find_words_in_html_files(map):
                     index[lemma] = WordInfo()
                 index[lemma].append_document_info(file.filename, count)
         print("end of reading doc ", file.filename)
-    for key in index.keys():
-        index[key].sort_documents()
     return dict(sorted(index.items()))
 
 
@@ -85,7 +77,7 @@ def write_index_generation_result(index):
     for word, doc_info in index.items():
         file_string = word + " "
         for doc in doc_info.documents:
-            file_string += " " + str(doc[0]) + " " + str(doc[1]) + ","
+            file_string += " " + str(doc)
         file_string += "\n"
         file.write(file_string)
     file.close()
