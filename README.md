@@ -13,3 +13,7 @@ Need run before script running:
 - pip install pymorphy2
 - pip install beautifulsoup4
 - pip install nltk
+
+* Task 3
+
+Just run
