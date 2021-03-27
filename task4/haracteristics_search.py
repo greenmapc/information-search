@@ -1,6 +1,7 @@
 import re
 import zipfile
 from functools import cmp_to_key
+from math import log
 
 from task2.tokenization_lemmatization import tokenization, get_lemma
 
@@ -83,6 +84,7 @@ def write_tf_idf(tf_idf_map):
         file.write(file_string)
     file.close()
 
+
 def tf_calculate():
     archive = zipfile.ZipFile('../task1/result.zip', 'r')
     tf_map = dict()
@@ -99,9 +101,9 @@ def tf_calculate():
         for key, value in tf_page_map.items():
             if key not in tf_map.keys():
                 tf_map[key] = []
-            tf = round(value / len(html_word_list), 3)
+            tf = round(value / len(html_word_list), 6)
             if tf != 0:
-                tf_map[key].append((file.filename, round(value / len(html_word_list), 3)))
+                tf_map[key].append((file.filename, tf))
         print("read tf for", file.filename)
     return tf_map
 
@@ -112,13 +114,14 @@ def idf_calculate():
     token_document_map = dict()
     index = read_index()
     for element, pages in index.items():
-        token_document_map[element] = round(len(pages) / documents_number, 3)
+        token_document_map[element] = round(log(documents_number / len(pages)), 6)
     return token_document_map
 
 
 def tf_idf_calculate():
     def comparator(x, y):
         return y[1] - x[1]
+
     def map_comparator(x, y):
         return len(x[1]) - len(y[1])
 
@@ -136,9 +139,10 @@ def tf_idf_calculate():
     return dict(sorted(tf_idf_map.items(), key=cmp_to_key(map_comparator), reverse=True))
 
 
-# tf_result = tf_calculate()
-# write_tf(tf_result)
-tf_idf_result = tf_idf_calculate()
-write_tf_idf(tf_idf_result)
-# idf_result = idf_calculate()
-# write_idf(idf_result)
+if __name__ == '__main__':
+    # tf_result = tf_calculate()
+    # write_tf(tf_result)
+    # idf_result = idf_calculate()
+    # write_idf(idf_result)
+    tf_idf_result = tf_idf_calculate()
+    write_tf_idf(tf_idf_result)
