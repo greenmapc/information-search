@@ -102,8 +102,7 @@ def tf_calculate():
             if key not in tf_map.keys():
                 tf_map[key] = []
             tf = round(value / len(html_word_list), 6)
-            if tf != 0:
-                tf_map[key].append((file.filename, tf))
+            tf_map[key].append((file.filename, tf))
         print("read tf for", file.filename)
     return tf_map
 
@@ -140,9 +139,9 @@ def tf_idf_calculate():
 
 
 if __name__ == '__main__':
-    # tf_result = tf_calculate()
-    # write_tf(tf_result)
-    # idf_result = idf_calculate()
-    # write_idf(idf_result)
+    tf_result = tf_calculate()
+    write_tf(tf_result)
+    idf_result = idf_calculate()
+    write_idf(idf_result)
     tf_idf_result = tf_idf_calculate()
     write_tf_idf(tf_idf_result)
