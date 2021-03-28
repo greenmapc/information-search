@@ -44,8 +44,8 @@ def read_tf():
     return tf_map
 
 
-def read_idf():
-    f = open("idf.txt", "r")
+def read_idf(path):
+    f = open(path, "r")
     lines = f.readlines()
     idf_map = dict()
     for line in lines:
@@ -124,24 +124,27 @@ def tf_idf_calculate():
     def map_comparator(x, y):
         return len(x[1]) - len(y[1])
 
+    archive = zipfile.ZipFile('../task1/result.zip', 'r')
+    html_files = list(map(lambda x: x.filename, archive.filelist))
     tf_data = dict(sorted(read_tf().items()))
-    idf_data = dict(sorted(read_idf().items()))
+    idf_data = dict(sorted(read_idf("idf.txt").items()))
     tf_idf_map = dict()
     for token, documents_tf in tf_data.items():
         tf_idf_map[token] = []
-        for document_tf in documents_tf:
-            document = document_tf[0]
-            tf = float(document_tf[1])
+        documents_tf = dict(documents_tf)
+        for document in html_files:
+            if document in documents_tf.keys():
+                tf = float(documents_tf[document])
+            else:
+                tf = float(0)
             tf_idf_map[token].append((document, tf * float(idf_data[token])))
-    for key, value in tf_idf_map.items():
-        tf_idf_map[key] = sorted(value, key=cmp_to_key(comparator))
-    return dict(sorted(tf_idf_map.items(), key=cmp_to_key(map_comparator), reverse=True))
+    return tf_idf_map
 
 
 if __name__ == '__main__':
-    tf_result = tf_calculate()
-    write_tf(tf_result)
-    idf_result = idf_calculate()
-    write_idf(idf_result)
+    # tf_result = tf_calculate()
+    # write_tf(tf_result)
+    # idf_result = idf_calculate()
+    # write_idf(idf_result)
     tf_idf_result = tf_idf_calculate()
     write_tf_idf(tf_idf_result)
