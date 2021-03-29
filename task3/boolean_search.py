@@ -1,8 +1,8 @@
 import re
 
 
-def read_index():
-    f = open("index.txt", "r")
+def read_index(index_file):
+    f = open(index_file, "r")
     lines = f.readlines()
     index = dict()
     for line in lines:
@@ -15,12 +15,11 @@ def read_index():
     return index
 
 
-def boolean_search(query):
+def boolean_search(query, index):
     and_operator = '&'
     or_operator = '|'
     not_operator = 'not'
 
-    index = read_index()
     all_pages = set()
     for page in index.values():
         all_pages = all_pages | page
@@ -40,11 +39,15 @@ def boolean_search(query):
     query_in_sets = []
 
     prev_set = set()
-    i = 0
     for i in range(len(words)):
         word = words[i]
         if i == len(words) - 1:
-            prev_set = difference_set(all_pages, index[word])
+            if word not in index.keys():
+                prev_set = set()
+            elif inversion:
+                prev_set = difference_set(all_pages, index[word])
+            else:
+                prev_set = index[word]
             query_in_sets.append((prev_set, None))
         if word == and_operator or word == or_operator:
             query_in_sets.append((prev_set, word))
@@ -53,7 +56,9 @@ def boolean_search(query):
         if word == not_operator:
             inversion = True
             continue
-        if inversion:
+        if word not in index.keys():
+            prev_set = set()
+        elif inversion:
             prev_set = difference_set(all_pages, index[word])
             inversion = False
         else:
@@ -80,14 +85,17 @@ def boolean_search(query):
     return or_result[0][0]
 
 
-result = boolean_search("лионель & месси | 2010 & not год")
-print(len(result))
-print(result)
+if __name__ == '__main__':
+    index = read_index("index.txt")
+    result = boolean_search("лионель & месси | 2010 & not год", index)
+    print(len(result))
+    result = list(map(lambda x: x[4:6], result))
+    print(result)
 
 '''
 Пример запроса для булева поиска:
 "лионель & месси | 2010 & not год"
 
 Результат
-{'page16.html', 'page20.html', 'page35.html', 'page69.html', 'page47.html', 'page36.html', 'page88.html', 'page30.html', 'page114.html', 'page94.html', 'page113.html', 'page10.html', 'page119.html', 'page39.html', 'page118.html', 'page99.html', 'page91.html', 'page107.html', 'page56.html', 'page79.html', 'page49.html', 'page95.html', 'page81.html', 'page87.html', 'page58.html', 'page104.html', 'page66.html', 'page101.html', 'page22.html', 'page115.html', 'page38.html', 'page32.html', 'page42.html', 'page108.html', 'page17.html', 'page117.html', 'page5.html', 'page59.html', 'page63.html', 'page80.html'}
+['66', '88', '20', '11', '16', '5.', '42', '10', '47', '56', '91', '11', '32', '10', '11', '35', '94', '58', '10', '11', '38', '10', '36', '11', '80', '30', '22', '11', '59', '69', '95', '63', '49', '87', '79', '10', '39', '17', '99', '81']
 '''
