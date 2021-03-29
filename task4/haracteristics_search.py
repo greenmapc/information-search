@@ -76,9 +76,9 @@ def write_idf(idf_map):
 
 def write_tf_idf(tf_idf_map):
     file = open("tf_idf.txt", "w")
-    for word, tf_list in tf_idf_map.items():
+    for word, tf_idf_list in tf_idf_map.items():
         file_string = word + " "
-        for tf in tf_list:
+        for tf in tf_idf_list:
             file_string += " " + tf[0] + " " + str(tf[1])
         file_string += "\n"
         file.write(file_string)
@@ -118,12 +118,6 @@ def idf_calculate():
 
 
 def tf_idf_calculate():
-    def comparator(x, y):
-        return y[1] - x[1]
-
-    def map_comparator(x, y):
-        return len(x[1]) - len(y[1])
-
     archive = zipfile.ZipFile('../task1/result.zip', 'r')
     html_files = list(map(lambda x: x.filename, archive.filelist))
     tf_data = dict(sorted(read_tf().items()))
@@ -144,7 +138,7 @@ def tf_idf_calculate():
 if __name__ == '__main__':
     # tf_result = tf_calculate()
     # write_tf(tf_result)
-    # idf_result = idf_calculate()
+    idf_result = idf_calculate()
     # write_idf(idf_result)
-    tf_idf_result = tf_idf_calculate()
-    write_tf_idf(tf_idf_result)
+    # tf_idf_result = tf_idf_calculate()
+    # write_tf_idf(tf_idf_result)
